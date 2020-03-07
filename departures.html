@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Departures</title>
+	<style>
+		body {
+			font-size: 40px;
+		}
+	</style>
+</head>
+<body>
+	<div id="departures"></div>
+	<script>
+		const formatTime = new Intl.RelativeTimeFormat('en', { style: 'narrow' });
+		document.body.onload = async function () {
+			const container = document.getElementById('departures');
+			const response = await fetch('http://localhost:3000/next-trains/1143/12/1');
+			const departures = await response.json();
+
+			const now = (new Date()).getTime();
+			const times = departures.map(departure => departure.estimatedDeparture || departure.scheduledDeparture)
+											.map(time => new Date(time))
+											.filter(date => date.getTime() > now)
+											.map(date => Math.round((date.getTime() - now) / 1000 / 60))
+											.forEach(time => {
+												const element = document.createElement('div');
+												element.textContent = '🚆';
+												element.style.position = 'absolute';
+												element.style.left = `${time}vw`;
+												container.append(element);
+											});
+		}
+	</script>
+</body>
+</html>
